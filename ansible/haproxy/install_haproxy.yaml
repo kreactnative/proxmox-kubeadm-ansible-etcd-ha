@@ -1,0 +1,26 @@
+---
+- name: Install haproxy
+  hosts: all
+  become: true
+  remote_user: rocky
+  tasks:
+    - name: install haproxy
+      dnf: name=haproxy state=present
+      tags: haproxy
+    - name: backup default config
+      shell: |
+        sudo mv /etc/haproxy/haproxy.cfg /etc/haproxy/haproxy.cfg.backup
+    - name: config haproxy
+      shell: |
+        sudo setenforce 0
+        sudo sed -i 's/SELINUX=enforcing/SELINUX=permissive/g' /etc/selinux/config
+        sudo setsebool -P haproxy_connect_any=1
+    - name: copy haproxy config
+      copy:
+        src: "{{ root_path }}/output/haproxy.cfg"
+        dest: /etc/haproxy/haproxy.cfg
+    - name: start and enable haproxy
+      service:
+        name: haproxy
+        state: started
+        enabled: yes
