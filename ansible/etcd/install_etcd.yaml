@@ -1,0 +1,36 @@
+---
+- name: Install etcd
+  hosts: all
+  become: true
+  remote_user: rocky
+  tasks:
+    - name: install etcd
+      shell: |
+        sudo mkdir -p /etc/etcd/pki
+        sudo yum install wget tar -y
+        wget https://github.com/etcd-io/etcd/releases/download/v3.5.10/etcd-v3.5.10-linux-amd64.tar.gz
+        tar zxf etcd-v3.5.10-linux-amd64.tar.gz
+        sudo cp etcd-v3.5.10-linux-amd64/etcd* /usr/local/bin/
+        sudo cp etcd-v3.5.10-linux-amd64/etcd* /usr/bin/
+        sudo rm -rf etcd*
+    - name: copy ca.pem
+      copy:
+        src: "{{ root_path }}/output/etcd/ca.pem"
+        dest: /etc/etcd/pki/ca.pem
+    - name: copy etcd.pem
+      copy:
+        src: "{{ root_path }}/output/etcd/etcd.pem"
+        dest: /etc/etcd/pki/etcd.pem
+    - name: copy etcd-key.pem
+      copy:
+        src: "{{ root_path }}/output/etcd/etcd-key.pem"
+        dest: /etc/etcd/pki/etcd-key.pem
+    - name: copy etcd.service
+      copy:
+        src: "{{ root_path }}/output/etcd/etcd-0{{ index }}.service"
+        dest: /etc/systemd/system/etcd.service
+    - name: start and enable etcd
+      service:
+        name: etcd
+        state: started
+        enabled: yes

@@ -70,3 +70,9 @@ data "external" "address" {
   working_dir = path.root
   program     = ["bash", "scripts/ip.sh", "${lower(proxmox_virtual_environment_vm.node.network_device[0].mac_address)}"]
 }
+
+/*data "external" "address_ipv6" {
+  depends_on  = [proxmox_virtual_environment_vm.node]
+  working_dir = path.root
+  program     = ["bash", "scripts/ip6.sh", "${lower(proxmox_virtual_environment_vm.node.network_device[0].mac_address)}"]
+}*/

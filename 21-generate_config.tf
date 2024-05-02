@@ -30,7 +30,7 @@ resource "local_file" "helm_ciliun_config" {
 }
 
 resource "local_file" "haproxy_config" {
-  depends_on = [module.elb_domain, module.master_domain]
+  depends_on = [module.elb_domain, module.master_domain, module.etcd_domain, module.worker_domain]
   content = templatefile("${path.root}/templates/haproxy.tmpl",
     {
       node_map_masters = zipmap(
@@ -39,4 +39,25 @@ resource "local_file" "haproxy_config" {
     }
   )
   filename = "output/haproxy.cfg"
+}
+
+resource "docker_image" "etcd" {
+  name = "harbor.socket9.com/etcd-cluster-gen/v${var.ETCD_COUNT}"
+}
+
+resource "docker_container" "generate_etcd_config" {
+  depends_on = [
+    module.etcd_domain
+  ]
+  image      = docker_image.etcd.image_id
+  name       = "etcd-generate"
+  privileged = true
+  tty        = true
+  rm         = true
+  attach     = false
+  env        = [for k, v in module.etcd_domain : "ETCD${index(module.etcd_domain, v) + 1}_IP=${v.address}"]
+  volumes {
+    container_path = "/app/certificate"
+    host_path      = "${abspath(path.module)}/output/etcd"
+  }
 }

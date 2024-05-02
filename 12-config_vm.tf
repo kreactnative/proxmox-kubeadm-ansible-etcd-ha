@@ -26,10 +26,6 @@ resource "null_resource" "config_worker_vm" {
     inline = [
       "sudo sh -c -e  \"echo '${module.worker_domain[count.index].address_ipv6} ${module.worker_domain[count.index].name}'| sudo tee -a /etc/hosts\"",
       "sudo sh -c -e  \"echo '${module.worker_domain[count.index].address} ${module.worker_domain[count.index].name}'| sudo tee -a /etc/hosts\"",
-      "sudo hostname",
-      "cat /etc/hosts",
-      "date",
-      "ip a"
     ]
     connection {
       type        = "ssh"
@@ -46,11 +42,7 @@ resource "null_resource" "config_etcd_vm" {
   provisioner "remote-exec" {
     inline = [
       "sudo sh -c -e \"echo '${module.etcd_domain[count.index].address_ipv6} ${module.etcd_domain[count.index].name}' | sudo tee -a /etc/hosts\"",
-      "sudo sh -c -e \"echo '${module.etcd_domain[count.index].address} ${module.etcd_domain[count.index].name}' | sudo tee -a /etc/hosts\"",
-      "sudo hostname",
-      "cat /etc/hosts",
-      "date",
-      "ip a"
+      "sudo sh -c -e \"echo '${module.etcd_domain[count.index].address} ${module.etcd_domain[count.index].name}' | sudo tee -a /etc/hosts\""
     ]
     connection {
       type        = "ssh"
@@ -68,11 +60,7 @@ resource "null_resource" "config_load_balancer_vm" {
   provisioner "remote-exec" {
     inline = [
       "sudo sh -c -e \"echo '${module.elb_domain[count.index].address_ipv6} ${module.elb_domain[count.index].name}' | sudo tee -a /etc/hosts\"",
-      "sudo sh -c -e \"echo '${module.elb_domain[count.index].address} ${module.elb_domain[count.index].name}' | sudo tee -a /etc/hosts\"",
-      "sudo hostname",
-      "cat /etc/hosts",
-      "date",
-      "ip a"
+      "sudo sh -c -e \"echo '${module.elb_domain[count.index].address} ${module.elb_domain[count.index].name}' | sudo tee -a /etc/hosts\""
     ]
     connection {
       type        = "ssh"

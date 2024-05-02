@@ -5,6 +5,7 @@ output "address" {
 
 output "address_ipv6" {
   value       = proxmox_virtual_environment_vm.node.ipv6_addresses[1][0]
+  //value       = data.external.address.result["address_ipv6"]
   description = "IP Address IPV6 of the node"
 }
 
