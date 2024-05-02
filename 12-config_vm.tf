@@ -1,4 +1,4 @@
-resource "null_resource" "test_create_master_vm" {
+resource "null_resource" "config_master_vm" {
   depends_on = [module.master_domain]
   count      = length(module.master_domain)
   provisioner "remote-exec" {
@@ -19,7 +19,7 @@ resource "null_resource" "test_create_master_vm" {
     }
   }
 }
-resource "null_resource" "test_create_worker_vm" {
+resource "null_resource" "config_worker_vm" {
   depends_on = [module.worker_domain]
   count      = length(module.worker_domain)
   provisioner "remote-exec" {
@@ -40,7 +40,7 @@ resource "null_resource" "test_create_worker_vm" {
     }
   }
 }
-resource "null_resource" "test_create_etcd_vm" {
+resource "null_resource" "config_etcd_vm" {
   depends_on = [module.etcd_domain]
   count      = length(module.etcd_domain)
   provisioner "remote-exec" {
@@ -62,7 +62,7 @@ resource "null_resource" "test_create_etcd_vm" {
   }
 }
 
-resource "null_resource" "test_create_load_balancer_vm" {
+resource "null_resource" "config_load_balancer_vm" {
   depends_on = [module.elb_domain]
   count      = length(module.elb_domain)
   provisioner "remote-exec" {
