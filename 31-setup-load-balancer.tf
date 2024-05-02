@@ -10,6 +10,12 @@ resource "null_resource" "ansible_elb" {
     inline = ["echo ${module.elb_domain[0].address} 'connected!'"]
   }
   provisioner "local-exec" {
+    command = "ansible-playbook  -i ${module.elb_domain[0].address}, --private-key '~/.ssh/id_rsa' ansible/monitoring/install_os_utils.yaml"
+  }
+  provisioner "local-exec" {
     command = "ansible-playbook  -i ${module.elb_domain[0].address}, --private-key '~/.ssh/id_rsa' ansible/haproxy/install_haproxy.yaml --extra-vars \"root_path=${path.cwd}\""
+  }
+  provisioner "local-exec" {
+    command = "ansible-playbook  -i ${module.elb_domain[0].address}, --private-key '~/.ssh/id_rsa' ansible/firewall/enable_elb_firewall.yaml"
   }
 }

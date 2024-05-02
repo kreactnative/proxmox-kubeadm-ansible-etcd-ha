@@ -1,0 +1,26 @@
+---
+- name: Install OS utils
+  hosts: all
+  become: true
+  remote_user: rocky
+  tasks:
+    - name: install epel-release
+      dnf:
+        name: epel-release
+        state: present
+        update_cache: yes
+    - name: install htop
+      package:
+        name: htop
+        state: present
+        update_cache: yes
+    - name: install nmap
+      package:
+        name: nmap
+        state: present
+        update_cache: yes
+    - name: install dnsutils
+      package:
+        name: dnsutils
+        state: present
+        update_cache: yes
