@@ -1,5 +1,5 @@
 resource "null_resource" "ansible_elb" {
-  depends_on = [module.elb_domain, module.master_domain, local_file.haproxy_config, null_resource.config_load_balancer_vm]
+  depends_on = [module.elb_domain,local_file.haproxy_config, null_resource.config_load_balancer_vm]
 
   provisioner "remote-exec" {
     connection {
