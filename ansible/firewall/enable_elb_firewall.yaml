@@ -3,6 +3,7 @@
   hosts: all
   become: true
   remote_user: rocky
+  #gather_facts: false
   tasks:
     - name: Install FirewallD
       shell: |

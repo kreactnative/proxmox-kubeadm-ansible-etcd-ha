@@ -1,0 +1,20 @@
+---
+- name: Ping
+  hosts: all
+  become: true
+  remote_user: rocky
+  #gather_facts: false
+  tasks:
+    - ping:
+    - name: Get information from ds.testmyipv6.com
+      raw: curl http://ds.testmyipv6.com/
+      changed_when: false
+      register: connection_test
+
+    - debug:
+        msg: IPv6 supported
+      when: "'You are successfully using IPv6 to connect to this server' in connection_test.stdout"
+
+    - debug:
+        msg: IPv6 not supported
+      when: "'You are connecting to this server via IPv4' in connection_test.stdout"
