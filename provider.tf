@@ -4,6 +4,10 @@ terraform {
       source  = "kreuzwerker/docker"
       version = "~> 3.0.2"
     }
+    ansible = {
+      source  = "ansible/ansible"
+      version = "1.2.0"
+    }
     proxmox = {
       source  = "bpg/proxmox"
       version = "0.38.1"

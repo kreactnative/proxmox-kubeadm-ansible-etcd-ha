@@ -1,0 +1,16 @@
+---
+- name: Ping
+  hosts: all
+  become: true
+  remote_user: rocky
+  tasks:
+    - name: add host ipv4
+      lineinfile:
+        dest: /etc/hosts
+        line: "{{ ip4 }} {{ hostName }}"
+        state: present
+    - name: add host ipv6
+      lineinfile:
+        dest: /etc/hosts
+        line: "{{ ip6 }} {{ hostName }}"
+        state: present

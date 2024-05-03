@@ -1,21 +1,33 @@
-resource "null_resource" "ansible_elb" {
-  depends_on = [module.elb_domain,local_file.haproxy_config, null_resource.config_load_balancer_vm]
-
-  provisioner "remote-exec" {
-    connection {
-      host        = module.elb_domain[0].address
-      user        = var.user
-      private_key = file("~/.ssh/id_rsa")
-    }
-    inline = ["echo ${module.elb_domain[0].address} 'connected!'"]
+resource "ansible_playbook" "setup_load_balancer" {
+  count                   = length(module.elb_domain)
+  playbook                = "ansible/haproxy/install_haproxy.yaml"
+  name                    = module.elb_domain[count.index].address
+  replayable              = false
+  ignore_playbook_failure = true
+  extra_vars = {
+    private_key      = file("~/.ssh/id_rsa")
+    ansible_ssh_user = var.user
+    ansible_ssh_user = var.user
+    root_path        = path.cwd
   }
-  provisioner "local-exec" {
-    command = "ansible-playbook  -u ${var.user}  -i ${module.elb_domain[0].address}, --private-key '~/.ssh/id_rsa' ansible/monitoring/install_os_utils.yaml"
+  depends_on = [
+    ansible_playbook.load_balancer_ping,
+    local_file.haproxy_config
+  ]
+}
+resource "ansible_playbook" "setup_load_balancer_firewall" {
+  count                   = length(module.elb_domain)
+  playbook                = "ansible/firewall/enable_elb_firewall.yaml"
+  name                    = module.elb_domain[count.index].address
+  replayable              = false
+  ignore_playbook_failure = true
+  extra_vars = {
+    private_key      = file("~/.ssh/id_rsa")
+    ansible_ssh_user = var.user
+    ansible_ssh_user = var.user
   }
-  provisioner "local-exec" {
-    command = "ansible-playbook  -u ${var.user}  -i ${module.elb_domain[0].address}, --private-key '~/.ssh/id_rsa' ansible/haproxy/install_haproxy.yaml --extra-vars \"root_path=${path.cwd}\""
-  }
-  provisioner "local-exec" {
-    command = "ansible-playbook  -u ${var.user}  -i ${module.elb_domain[0].address}, --private-key '~/.ssh/id_rsa' ansible/firewall/enable_elb_firewall.yaml"
-  }
+  depends_on = [
+    ansible_playbook.load_balancer_ping,
+    local_file.haproxy_config
+  ]
 }
