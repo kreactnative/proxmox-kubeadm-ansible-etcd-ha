@@ -1,5 +1,5 @@
 resource "null_resource" "ansible_etcd" {
-  depends_on = [module.etcd_domain, docker_container.generate_etcd_config]
+  depends_on = [module.etcd_domain, docker_container.generate_etcd_config, null_resource.config_etcd_vm]
   count      = var.ETCD_COUNT
 
   provisioner "remote-exec" {

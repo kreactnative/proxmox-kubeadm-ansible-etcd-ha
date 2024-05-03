@@ -1,0 +1,64 @@
+---
+- name: Init Kubernetes first master
+  hosts: all
+  become: true
+  remote_user: rocky
+  tasks:
+    - name: create etcd certificate folder
+      shell: |
+        sudo mkdir -p /etc/kubernetes/pki/etcd
+    - name: copy ca.pem
+      copy:
+        src: "../etcd/files/ca.pem"
+        dest: /tmp/ca.pem
+    - name: copy etcd.pem
+      copy:
+        src: "../etcd/files/etcd.pem"
+        dest: /tmp/etcd.pem
+    - name: copy etcd-key.pem
+      copy:
+        src: "../etcd/files/etcd-key.pem"
+        dest: /tmp/etcd-key.pem
+    - name: copy cluster configuration
+      copy:
+        src: "cluster.yaml"
+        dest: /tmp/cluster.yaml
+    - name: kubernetes init
+      shell: |
+        cd /tmp
+        export IPV6=$(hostname -I | egrep -o '[0-9a-z:]+:[0-9a-z:]+' | head -n 1)
+        echo $IPV6
+        export HOSTNAME=$(hostname)
+        echo $HOSTNAME
+        sudo /bin/sh -c 'echo "${IPV6} ${HOSTNAME}" >> /etc/hosts'
+        sed -i "s/current_master_ipv6/"${IPV6}"/g" /tmp/cluster.yaml
+        sudo kubeadm reset --force
+        sudo rm -rf $HOME/.kube/config  /tmp/config
+        sudo mkdir -p /etc/kubernetes/pki/etcd
+        sudo cp ca.pem etcd.pem etcd-key.pem /etc/kubernetes/pki/etcd/
+        sudo kubeadm init --config=cluster.yaml --upload-certs
+        mkdir -p $HOME/.kube
+        sudo cp -i /etc/kubernetes/admin.conf $HOME/.kube/config
+        sudo cp -i /etc/kubernetes/admin.conf /tmp/config
+        sudo chown $(id -u):$(id -g) $HOME/.kube/config
+        sudo chown -R rocky:rocky /tmp/config
+        sudo rm -rf join-master.sh join-worker.sh
+        sudo echo $(kubeadm token create --print-join-command) --control-plane --certificate-key $(sudo kubeadm init phase upload-certs --upload-certs --config cluster.yaml | grep -vw -e certificate -e Namespace) >> join-master.sh
+        sudo kubeadm token create --print-join-command >> join-worker.sh
+        sudo chown -R rocky:rocky join-master.sh
+        sudo chown -R rocky:rocky join-worker.sh
+    - name: Copy kubeconfig
+      fetch:
+        src: /tmp/config
+        dest: "{{ root_path }}/config"
+        mode: 0774
+    - name: Copy join master
+      fetch:
+        src: /tmp/join-master.sh
+        dest: "{{ root_path }}/joins"
+        mode: 0774
+    - name: Copy join worker
+      fetch:
+        src: /tmp/join-worker.sh
+        dest: "{{ root_path }}/joins"
+        mode: 0774

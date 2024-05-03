@@ -5,10 +5,6 @@ resource "null_resource" "config_master_vm" {
     inline = [
       "sudo sh -c -e  \"echo '${module.master_domain[count.index].address_ipv6} ${module.master_domain[count.index].name}' | sudo tee -a /etc/hosts\"",
       "sudo sh -c -e  \"echo '${module.master_domain[count.index].address} ${module.master_domain[count.index].name}' | sudo tee -a /etc/hosts\"",
-      "sudo hostname",
-      "cat /etc/hosts",
-      "date",
-      "ip a"
     ]
     connection {
       type        = "ssh"

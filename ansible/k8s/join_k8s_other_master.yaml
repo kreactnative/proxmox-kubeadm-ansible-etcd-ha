@@ -1,0 +1,38 @@
+---
+- name: Join Other Kubernetes Master
+  hosts: all
+  become: true
+  remote_user: rocky
+  tasks:
+    - name: copy control plane config
+      copy:
+        src: control-plane.yaml
+        dest: /tmp/control-plane.yaml
+    - name: copy join master
+      copy:
+        src: "joins/{{ first_master_ip }}/tmp/join-master.sh"
+        dest: /tmp/join-master.sh
+    - name: kubernetes join other master
+      shell: |
+        cd /tmp
+        export IPV6=$(hostname -I | egrep -o '[0-9a-z:]+:[0-9a-z:]+' | head -n 1)
+        echo $IPV6
+        export HOSTNAME=$(hostname)
+        echo $HOSTNAME
+        sudo echo "${IPV6} ${HOSTNAME}" >> /etc/hosts
+        sudo echo "{{ master_ip }} ${HOSTNAME}" >> /etc/hosts
+        sudo kubeadm reset --force
+        sudo rm -rf $HOME/.kube/config  /tmp/config
+        export KUBEADM_JOIN_CERTKEY="$(cat  /tmp/join-master.sh | grep "$10" | awk ' { printf $10 } ')"
+        export KUBEADM_JOIN_CACERT="$(cat  /tmp/join-master.sh | grep "$7" | awk ' { printf $7 } ')"
+        export KUBEADM_JOIN_TOKEN="$(cat  /tmp/join-master.sh | grep "$5" | awk ' { printf $5 } ')"
+        echo $KUBEADM_JOIN_CERTKEY
+        echo $KUBEADM_JOIN_CACERT
+        echo $KUBEADM_JOIN_TOKEN
+        sed -i "s/ipv4addr/{{ master_ip }}/g" /tmp/control-plane.yaml
+        sed -i "s/kubeadm_join_certkey/$KUBEADM_JOIN_CERTKEY/g" /tmp/control-plane.yaml
+        sed -i "s/kubeadm_join_token/$KUBEADM_JOIN_TOKEN/g" /tmp/control-plane.yaml
+        sed -i "s/kubeadm_join_cacert/$KUBEADM_JOIN_CACERT/g" /tmp/control-plane.yaml
+        sed -i "s/loadbalancer_ipv4/{{ elb_ip }}/g" /tmp/control-plane.yaml
+        sed -i "s/ipv6addr/"${IPV6}"/g" /tmp/control-plane.yaml
+        sudo kubeadm join --config=/tmp/control-plane.yaml

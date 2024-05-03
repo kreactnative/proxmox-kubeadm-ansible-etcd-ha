@@ -1,0 +1,30 @@
+---
+- name: Join Kubernetes worker
+  hosts: all
+  become: true
+  remote_user: rocky
+  tasks:
+    - name: copy worker config
+      copy:
+        src: worker.yaml
+        dest: /tmp/worker.yaml
+    - name: copy join worker
+      copy:
+        src: "joins/{{ first_master_ip }}/tmp/join-worker.sh"
+        dest: /tmp/join-worker.sh
+    - name: kubernetes join worker
+      shell: |
+        cd /tmp
+        export IPV6=$(hostname -I | egrep -o '[0-9a-z:]+:[0-9a-z:]+' | head -n 1)
+        export HOSTNAME=$(hostname)
+        sudo echo "${IPV6} ${HOSTNAME}" >> /etc/hosts
+        sudo echo "{{ worker_ip }} ${HOSTNAME}" >> /etc/hosts
+        sudo kubeadm reset --force
+        export KUBEADM_JOIN_CACERT="$(cat  /tmp/join-worker.sh | grep "$7" | awk ' { printf $7 } ')"
+        export KUBEADM_JOIN_TOKEN="$(cat  /tmp/join-worker.sh | grep "$5" | awk ' { printf $5 } ')"
+        sed -i "s/ipv4addr/{{ worker_ip }}/g" /tmp/worker.yaml
+        sed -i "s/kubeadm_join_token/$KUBEADM_JOIN_TOKEN/g" /tmp/worker.yaml
+        sed -i "s/kubeadm_join_cacert/$KUBEADM_JOIN_CACERT/g" /tmp/worker.yaml
+        sed -i "s/loadbalancer_ipv4/{{ elb_ip }}/g" /tmp/worker.yaml
+        sed -i "s/ipv6addr/"${IPV6}"/g" /tmp/worker.yaml
+        sudo kubeadm join --config=/tmp/worker.yaml
