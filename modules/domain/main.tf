@@ -21,7 +21,7 @@ resource "proxmox_virtual_environment_vm" "node" {
   }
 
   disk {
-    datastore_id = "local-zfs"
+    datastore_id = "local-lvm"
     interface    = "scsi0"
     size         = 60
   }
@@ -56,7 +56,7 @@ resource "proxmox_virtual_environment_vm" "node" {
         address = "dhcp"
       }
     }
-    datastore_id = "local-zfs"
+    datastore_id = "local-lvm"
     user_account {
       keys     = [var.ssh_key]
       username = var.user
