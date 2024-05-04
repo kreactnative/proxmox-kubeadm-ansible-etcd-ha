@@ -1,0 +1,22 @@
+{
+  "CN": "etcd",
+  "hosts": [
+    "localhost",
+    "127.0.0.1",
+    "192.168.1.51",
+    "192.168.1.48"
+  ],
+  "key": {
+    "algo": "rsa",
+    "size": 2048
+  },
+  "names": [
+    {
+      "C": "TH",
+      "L": "Thailand",
+      "O": "Kubernetes",
+      "OU": "etcd",
+      "ST": "Bangkok"
+    }
+  ]
+}

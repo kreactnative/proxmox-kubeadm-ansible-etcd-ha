@@ -3,7 +3,7 @@ resource "ansible_playbook" "master_etc_host" {
   playbook                = "ansible/utils/host.yaml"
   name                    = module.master_domain[count.index].address
   replayable              = false
-  ignore_playbook_failure = true
+  ignore_playbook_failure = false
   extra_vars = {
     private_key      = file("~/.ssh/id_rsa")
     ansible_ssh_user = var.user
@@ -20,10 +20,9 @@ resource "ansible_playbook" "worker_etc_host" {
   playbook                = "ansible/utils/host.yaml"
   name                    = module.worker_domain[count.index].address
   replayable              = false
-  ignore_playbook_failure = true
+  ignore_playbook_failure = false
   extra_vars = {
     private_key      = file("~/.ssh/id_rsa")
-    ansible_ssh_user = var.user
     ansible_ssh_user = var.user
     hostName         = module.worker_domain[count.index].name
     ip4              = module.worker_domain[count.index].address
@@ -38,10 +37,9 @@ resource "ansible_playbook" "etcd_etc_host" {
   playbook                = "ansible/utils/host.yaml"
   name                    = module.etcd_domain[count.index].address
   replayable              = false
-  ignore_playbook_failure = true
+  ignore_playbook_failure = false
   extra_vars = {
     private_key      = file("~/.ssh/id_rsa")
-    ansible_ssh_user = var.user
     ansible_ssh_user = var.user
     hostName         = module.etcd_domain[count.index].name
     ip4              = module.etcd_domain[count.index].address
@@ -57,10 +55,9 @@ resource "ansible_playbook" "load_balancer_etc_host" {
   playbook                = "ansible/utils/host.yaml"
   name                    = module.elb_domain[count.index].address
   replayable              = false
-  ignore_playbook_failure = true
+  ignore_playbook_failure = false
   extra_vars = {
     private_key      = file("~/.ssh/id_rsa")
-    ansible_ssh_user = var.user
     ansible_ssh_user = var.user
     hostName         = module.elb_domain[count.index].name
     ip4              = module.elb_domain[count.index].address

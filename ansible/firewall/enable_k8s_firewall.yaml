@@ -1,49 +1,34 @@
 ---
-- name: Enable k8s firewall
+- name: Enable elb firewall
   hosts: all
   become: true
   remote_user: rocky
-  #gather_facts: false
+  vars:
+    port_list:
+      - { port: 22/tcp, state: enabled }
+      - { port: 6443/tcp, state: enabled }
   tasks:
-    - name: Install FirewallD
-      shell: |
-        sudo dnf install firewalld -y
-        sudo systemctl enable firewalld
-        sudo systemctl start firewalld
-        sudo firewall-cmd --permanent --add-port=6443/tcp --zone=public
-        sudo firewall-cmd --permanent --add-port=2379-2380/tcp --zone=public
-        sudo firewall-cmd --permanent --add-port=10250/tcp --zone=public
-        sudo firewall-cmd --permanent --add-port=10251/tcp --zone=public
-        sudo firewall-cmd --permanent --add-port=10252/tcp --zone=public
-        sudo firewall-cmd --permanent --add-port=10255/tcp --zone=public
-        sudo firewall-cmd --permanent --add-port=8472/udp --zone=public
-        sudo firewall-cmd --permanent --add-masquerade  --zone=public
-        sudo firewall-cmd --permanent --add-port=30000-32767/tcp --zone=public
-        sudo firewall-cmd --permanent --add-port=4240/tcp --zone=public
-        sudo firewall-cmd --permanent --add-port=4244/tcp --zone=public
-        sudo firewall-cmd --permanent --add-port=4245/tcp --zone=public
-        sudo firewall-cmd --permanent --add-port=6060/tcp --zone=public
-        sudo firewall-cmd --permanent --add-port=6061/tcp --zone=public
-        sudo firewall-cmd --permanent --add-port=6062/tcp --zone=public
-        sudo firewall-cmd --permanent --add-port=9879/tcp --zone=public
-        sudo firewall-cmd --permanent --add-port=9890/tcp --zone=public
-        sudo firewall-cmd --permanent --add-port=9891/tcp --zone=public
-        sudo firewall-cmd --permanent --add-port=9892/tcp --zone=public
-        sudo firewall-cmd --permanent --add-port=9893/tcp --zone=public
-        sudo firewall-cmd --permanent --add-port=9962/tcp --zone=public
-        sudo firewall-cmd --permanent --add-port=9963/tcp --zone=public
-        sudo firewall-cmd --permanent --add-port=9964/tcp --zone=public
-        sudo firewall-cmd --permanent --add-port=51871/udp --zone=public
-        sudo firewall-cmd --permanent --add-port=15021/tcp --zone=public
-        sudo firewall-cmd --permanent --add-port=9090/tcp --zone=public
-        sudo firewall-cmd --permanent --add-port=15017/tcp --zone=public
-        sudo firewall-cmd --permanent --add-port=9100/tcp --zone=public
-        sudo firewall-cmd --permanent --add-port=8080/tcp --zone=public
-        sudo firewall-cmd --permanent --add-port=9234/tcp --zone=public
-        sudo firewall-cmd --permanent --add-port=22/tcp --zone=public
-        sudo firewall-cmd --permanent --add-port=6556/tcp --zone=public
-        sudo firewall-cmd --permanent --add-port=9200/tcp --zone=public
-        sudo firewall-cmd --permanent --add-port=266/tcp --zone=public
-        sudo firewall-cmd --permanent --add-port=1687/tcp --zone=public
-        sudo firewall-cmd --permanent --add-port=3362/tcp --zone=public
-        sudo systemctl restart firewalld
+    - name: Install firewalld
+      yum:
+        name: firewalld
+        state: latest
+      notify:
+        - start firewalld
+    - name: Enable ports on the list
+      firewalld:
+        zone: public
+        port: "{{ item.port }}"
+        permanent: true
+        state: "{{ item.state }}"
+      loop: "{{ port_list }}"
+      notify:
+        - Restart firewalld
+  handlers:
+    - name: Restart firewalld
+      service:
+        name: firewalld
+        state: restarted
+    - name: start firewalld
+      service:
+        name: firewalld
+        state: started

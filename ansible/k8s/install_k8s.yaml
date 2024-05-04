@@ -20,7 +20,7 @@
       modprobe:
         name: br_netfilter
         state: present
-    - name: Copy conf for 'net.bridge.bridge-nf-call-iptables'
+    - name: Copy sys conf
       copy:
         src: k8s.conf
         dest: /etc/sysctl.d/k8s.conf
@@ -37,8 +37,6 @@
         sudo curl -L -o /etc/yum.repos.d/devel:kubic:libcontainers:stable:cri-o:${VERSION}.repo https://download.opensuse.org/repositories/devel:kubic:libcontainers:stable:cri-o:${VERSION}/CentOS_8/devel:kubic:libcontainers:stable:cri-o:${VERSION}.repo
     - name: Install cri-o and cri-o tools
       shell: |
-        sudo sysctl -w net.ipv6.conf.all.forwarding=1
-        echo net.ipv6.conf.all.forwarding=1 >> /etc/sysctl.conf
         sudo dnf install cri-o cri-tools -y
         sudo systemctl daemon-reload
         sudo systemctl enable crio --now

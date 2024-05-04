@@ -14,7 +14,7 @@ resource "local_file" "cluster_config" {
       )
     }
   )
-  filename = "output/cluster.yaml"
+  filename = "ansible/k8s/files/cluster.yaml"
 }
 
 resource "local_file" "helm_ciliun_config" {
@@ -26,7 +26,7 @@ resource "local_file" "helm_ciliun_config" {
       loadbalancer_ip = module.elb_domain[0].address
     }
   )
-  filename = "output/helm-cni-lb.sh"
+  filename = "ansible/k8s/files/helm-cni-lb.sh"
 }
 
 resource "local_file" "haproxy_config" {
@@ -38,7 +38,7 @@ resource "local_file" "haproxy_config" {
       ),
     }
   )
-  filename = "output/haproxy.cfg"
+  filename = "ansible/haproxy/files/haproxy.cfg"
 }
 
 resource "docker_image" "etcd" {
@@ -58,6 +58,6 @@ resource "docker_container" "generate_etcd_config" {
   env        = [for k, v in module.etcd_domain : "ETCD${index(module.etcd_domain, v) + 1}_IP=${v.address}"]
   volumes {
     container_path = "/app/certificate"
-    host_path      = "${abspath(path.module)}/output/etcd"
+    host_path      = "${abspath(path.module)}/ansible/etcd/files"
   }
 }

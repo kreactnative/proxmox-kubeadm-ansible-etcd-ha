@@ -1,18 +1,35 @@
 ---
-- name: Enable etcd firewall
+- name: Enable elb firewall
   hosts: all
   become: true
   remote_user: rocky
-  #gather_facts: false
+  vars:
+    port_list:
+      - { port: 22/tcp, state: enabled }
+      - { port: 2379/tcp, state: enabled }
+      - { port: 2380/tcp, state: enabled }
   tasks:
-    - name: Install FirewallD
-      shell: |
-        sudo dnf install firewalld -y
-        sudo systemctl enable firewalld
-        sudo systemctl start firewalld
-        sudo firewall-cmd --permanent --add-port=2379/tcp --zone=public
-        sudo firewall-cmd --permanent --add-port=2380/tcp --zone=public
-        sudo firewall-cmd --permanent --add-port=22/tcp --zone=public
-        sudo firewall-cmd --permanent --add-port=6556/tcp --zone=public
-        sudo firewall-cmd --permanent --add-port=9200/tcp --zone=public
-        sudo systemctl restart firewalld
+    - name: Install firewalld
+      yum:
+        name: firewalld
+        state: latest
+      notify:
+        - start firewalld
+    - name: Enable ports on the list
+      firewalld:
+        zone: public
+        port: "{{ item.port }}"
+        permanent: true
+        state: "{{ item.state }}"
+      loop: "{{ port_list }}"
+      notify:
+        - Restart firewalld
+  handlers:
+    - name: Restart firewalld
+      service:
+        name: firewalld
+        state: restarted
+    - name: start firewalld
+      service:
+        name: firewalld
+        state: started
