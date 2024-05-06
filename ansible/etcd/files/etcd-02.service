@@ -13,12 +13,12 @@ ExecStart=/usr/local/bin/etcd \
   --peer-trusted-ca-file=/etc/etcd/pki/ca.pem \
   --peer-client-cert-auth \
   --client-cert-auth \
-  --initial-advertise-peer-urls https://192.168.1.142:2380 \
-  --listen-peer-urls https://192.168.1.142:2380 \
-  --advertise-client-urls https://192.168.1.142:2379 \
-  --listen-client-urls https://192.168.1.142:2379,https://127.0.0.1:2379 \
+  --initial-advertise-peer-urls https://192.168.1.148:2380 \
+  --listen-peer-urls https://192.168.1.148:2380 \
+  --advertise-client-urls https://192.168.1.148:2379 \
+  --listen-client-urls https://192.168.1.148:2379,https://127.0.0.1:2379 \
   --initial-cluster-token etcd-cluster-1 \
-  --initial-cluster etcd-01=https://192.168.1.138:2380,etcd-02=https://192.168.1.142:2380 \
+  --initial-cluster etcd-01=https://192.168.1.149:2380,etcd-02=https://192.168.1.148:2380 \
   --initial-cluster-state new
 Restart=on-failure
 RestartSec=5

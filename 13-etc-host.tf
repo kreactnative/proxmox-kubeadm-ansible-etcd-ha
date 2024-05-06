@@ -12,7 +12,7 @@ resource "ansible_playbook" "master_etc_host" {
     ip6              = module.master_domain[count.index].address_ipv6
   }
   depends_on = [
-    ansible_playbook.load_balancer_ping
+    ansible_playbook.load_balancer_update
   ]
 }
 resource "ansible_playbook" "worker_etc_host" {

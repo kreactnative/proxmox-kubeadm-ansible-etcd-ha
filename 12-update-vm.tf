@@ -1,4 +1,4 @@
-resource "ansible_playbook" "master_ping" {
+resource "ansible_playbook" "master_update" {
   count                   = length(module.master_domain)
   playbook                = "ansible/utils/upgrade.yaml"
   name                    = module.master_domain[count.index].address
@@ -15,7 +15,7 @@ resource "ansible_playbook" "master_ping" {
     module.etcd_domain
   ]
 }
-resource "ansible_playbook" "worker_ping" {
+resource "ansible_playbook" "worker_update" {
   count                   = length(module.worker_domain)
   playbook                = "ansible/utils/upgrade.yaml"
   name                    = module.worker_domain[count.index].address
@@ -26,10 +26,10 @@ resource "ansible_playbook" "worker_ping" {
     ansible_ssh_user = var.user
   }
   depends_on = [
-    ansible_playbook.master_ping
+    ansible_playbook.master_update
   ]
 }
-resource "ansible_playbook" "etcd_ping" {
+resource "ansible_playbook" "etcd_update" {
   count                   = length(module.etcd_domain)
   playbook                = "ansible/utils/upgrade.yaml"
   name                    = module.etcd_domain[count.index].address
@@ -40,11 +40,11 @@ resource "ansible_playbook" "etcd_ping" {
     ansible_ssh_user = var.user
   }
   depends_on = [
-    ansible_playbook.worker_ping
+    ansible_playbook.worker_update
   ]
 }
 
-resource "ansible_playbook" "load_balancer_ping" {
+resource "ansible_playbook" "load_balancer_update" {
   count                   = length(module.elb_domain)
   playbook                = "ansible/utils/upgrade.yaml"
   name                    = module.elb_domain[count.index].address
@@ -55,6 +55,6 @@ resource "ansible_playbook" "load_balancer_ping" {
     ansible_ssh_user = var.user
   }
   depends_on = [
-    ansible_playbook.etcd_ping
+    ansible_playbook.etcd_update
   ]
 }
