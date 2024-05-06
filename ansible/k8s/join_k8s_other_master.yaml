@@ -2,6 +2,7 @@
 - name: Join Other Kubernetes Master
   hosts: all
   become: true
+  gather_facts: false
   remote_user: rocky
   tasks:
     - name: copy control plane config

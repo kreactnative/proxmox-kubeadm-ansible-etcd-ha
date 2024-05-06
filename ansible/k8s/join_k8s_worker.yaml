@@ -2,6 +2,7 @@
 - name: Join Kubernetes worker
   hosts: all
   become: true
+  gather_facts: false
   remote_user: rocky
   tasks:
     - name: copy worker config

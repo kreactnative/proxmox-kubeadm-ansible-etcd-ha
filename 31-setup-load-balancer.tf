@@ -10,8 +10,7 @@ resource "ansible_playbook" "setup_load_balancer" {
     root_path        = path.cwd
   }
   depends_on = [
-    docker_container.generate_etcd_config,
-    ansible_playbook.load_balancer_ping
+    docker_container.generate_etcd_config
   ]
 }
 resource "ansible_playbook" "setup_load_balancer_firewall" {

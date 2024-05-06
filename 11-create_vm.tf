@@ -1,7 +1,7 @@
 module "master_domain" {
   source         = "./modules/domain"
   count          = var.MASTER_COUNT
-  name           = format("master-%s", count.index + 1)
+  name           = format("a-master-%s", count.index + 1)
   memory         = var.master_config.memory
   vcpus          = var.master_config.vcpus
   sockets        = var.master_config.sockets
@@ -15,7 +15,7 @@ module "master_domain" {
 module "worker_domain" {
   source         = "./modules/domain"
   count          = var.WORKER_COUNT
-  name           = format("worker-%s", count.index + 1)
+  name           = format("a-worker-%s", count.index + 1)
   memory         = var.worker_config.memory
   vcpus          = var.worker_config.vcpus
   sockets        = var.worker_config.sockets
@@ -43,7 +43,7 @@ module "etcd_domain" {
 module "elb_domain" {
   source         = "./modules/domain"
   count          = 1
-  name           = "load-balancer"
+  name           = "a-load-balancer"
   memory         = var.elb_config.memory
   vcpus          = var.elb_config.vcpus
   sockets        = var.elb_config.sockets

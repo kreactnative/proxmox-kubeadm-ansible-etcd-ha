@@ -3,7 +3,7 @@
   hosts: all
   become: true
   remote_user: rocky
-  #gather_facts: false
+  gather_facts: false
   tasks:
     - name: disable SELinux
       ansible.posix.selinux:
@@ -28,18 +28,16 @@
     - name: Reload parameters sysctl
       shell: sysctl -p --system
       when: sysctl_config.changed
-    - name: enable cri-repo
-      environment:
-        OS: CentOS_8
-        VERSION: 1.28
+    - name: Install containerd
       shell: |
-        sudo curl -L -o /etc/yum.repos.d/devel:kubic:libcontainers:stable.repo https://download.opensuse.org/repositories/devel:kubic:libcontainers:stable/CentOS_8/devel:kubic:libcontainers:stable.repo
-        sudo curl -L -o /etc/yum.repos.d/devel:kubic:libcontainers:stable:cri-o:${VERSION}.repo https://download.opensuse.org/repositories/devel:kubic:libcontainers:stable:cri-o:${VERSION}/CentOS_8/devel:kubic:libcontainers:stable:cri-o:${VERSION}.repo
-    - name: Install cri-o and cri-o tools
-      shell: |
-        sudo dnf install cri-o cri-tools -y
-        sudo systemctl daemon-reload
-        sudo systemctl enable crio --now
+        dnf config-manager --add-repo https://download.docker.com/linux/centos/docker-ce.repo
+        dnf makecache
+        dnf install -y containerd.io
+        mv /etc/containerd/config.toml /etc/containerd/config.toml.orig
+        containerd config default > /etc/containerd/config.toml
+        sed -i "s|SystemdCgroup = false|SystemdCgroup = true|g" /etc/containerd/config.toml
+        systemctl enable --now containerd.service
+        systemctl status containerd.service --no-pager
     - name: Copy k8s repo
       copy:
         src: k8s.repo

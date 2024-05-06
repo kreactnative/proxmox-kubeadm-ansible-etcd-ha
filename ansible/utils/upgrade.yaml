@@ -1,0 +1,11 @@
+---
+- name: upgrade
+  hosts: all
+  become: true
+  remote_user: rocky
+  gather_facts: false
+  tasks:
+    - name: Install system updates for base centos systems
+      shell: |
+        dnf update -y
+        dnf upgrade -y

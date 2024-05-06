@@ -26,10 +26,3 @@ provider "proxmox" {
   password = var.PROXMOX_PASSWORD
   insecure = true
 }
-
-resource "null_resource" "cleanup" {
-  provisioner "local-exec" {
-    command     = "rm -rf output && mkdir -p output && mkdir -p output/etcd"
-    working_dir = path.root
-  }
-}

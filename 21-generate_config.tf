@@ -1,8 +1,6 @@
 resource "local_file" "cluster_config" {
   depends_on = [
-    module.etcd_domain,
-    module.elb_domain,
-    module.master_domain
+    ansible_playbook.load_balancer_etc_host
   ]
   content = templatefile("${path.root}/templates/config.tmpl",
     {
@@ -19,7 +17,7 @@ resource "local_file" "cluster_config" {
 
 resource "local_file" "helm_ciliun_config" {
   depends_on = [
-    module.elb_domain
+    local_file.cluster_config
   ]
   content = templatefile("${path.root}/templates/helm-cni-lb.tmpl",
     {
@@ -30,7 +28,9 @@ resource "local_file" "helm_ciliun_config" {
 }
 
 resource "local_file" "haproxy_config" {
-  depends_on = [module.elb_domain, module.master_domain, module.etcd_domain, module.worker_domain]
+  depends_on = [
+    local_file.helm_ciliun_config
+    ]
   content = templatefile("${path.root}/templates/haproxy.tmpl",
     {
       node_map_masters = zipmap(
@@ -47,7 +47,7 @@ resource "docker_image" "etcd" {
 
 resource "docker_container" "generate_etcd_config" {
   depends_on = [
-    module.etcd_domain
+    local_file.haproxy_config
   ]
   image      = docker_image.etcd.image_id
   name       = "etcd-generate"

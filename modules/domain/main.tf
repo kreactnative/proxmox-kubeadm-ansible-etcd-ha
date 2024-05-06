@@ -14,14 +14,14 @@ resource "proxmox_virtual_environment_vm" "node" {
   bios                = "seabios"
   scsi_hardware       = "virtio-scsi-pci"
   timeout_shutdown_vm = 300
-  tags                = ["rocky", "k8s"]
+  tags                = ["rocky", "ansible", "k8s"]
 
   memory {
     dedicated = var.memory
   }
 
   disk {
-    datastore_id = "local-lvm"
+    datastore_id = "local-zfs"
     interface    = "scsi0"
     size         = 60
   }
@@ -56,7 +56,7 @@ resource "proxmox_virtual_environment_vm" "node" {
         address = "dhcp"
       }
     }
-    datastore_id = "local-lvm"
+    datastore_id = "local-zfs"
     user_account {
       keys     = [var.ssh_key]
       username = var.user

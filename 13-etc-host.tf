@@ -12,7 +12,7 @@ resource "ansible_playbook" "master_etc_host" {
     ip6              = module.master_domain[count.index].address_ipv6
   }
   depends_on = [
-    ansible_playbook.master_ping
+    ansible_playbook.load_balancer_ping
   ]
 }
 resource "ansible_playbook" "worker_etc_host" {
@@ -29,7 +29,7 @@ resource "ansible_playbook" "worker_etc_host" {
     ip6              = module.worker_domain[count.index].address_ipv6
   }
   depends_on = [
-    ansible_playbook.worker_ping
+    ansible_playbook.master_etc_host
   ]
 }
 resource "ansible_playbook" "etcd_etc_host" {
@@ -46,7 +46,7 @@ resource "ansible_playbook" "etcd_etc_host" {
     ip6              = module.etcd_domain[count.index].address_ipv6
   }
   depends_on = [
-    ansible_playbook.etcd_ping
+    ansible_playbook.worker_etc_host
   ]
 }
 
@@ -64,6 +64,6 @@ resource "ansible_playbook" "load_balancer_etc_host" {
     ip6              = module.elb_domain[count.index].address_ipv6
   }
   depends_on = [
-    ansible_playbook.load_balancer_ping
+    ansible_playbook.etcd_etc_host
   ]
 }

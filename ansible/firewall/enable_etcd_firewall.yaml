@@ -2,6 +2,7 @@
 - name: Enable elb firewall
   hosts: all
   become: true
+  gather_facts: false
   remote_user: rocky
   vars:
     port_list:

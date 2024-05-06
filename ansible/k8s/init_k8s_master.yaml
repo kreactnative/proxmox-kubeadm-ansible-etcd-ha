@@ -2,6 +2,7 @@
 - name: Init Kubernetes first master
   hosts: all
   become: true
+  gather_facts: false
   remote_user: rocky
   tasks:
     - name: create etcd certificate folder
